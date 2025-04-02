@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Principales Indicadores Dirección Riesgo Infraestructura</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        nav {
+            background-color: #f0f0f0;
+            padding: 10px;
+        }
+        nav a {
+            margin-right: 10px;
+            text-decoration: none;
+        }
+        .container {
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .green { background-color: #c2e0c6; }
+        .yellow { background-color: #fffacd; }
+        .red { background-color: #f8cac6; }
+        /* Estilos responsivos */
+        @media (max-width: 600px) {
+            table { font-size: 0.8em; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="#inicio">Inicio</a>
+        <a href="#ejecutivo">Vista Ejecutiva</a>
+        <a href="#detalle">Detalle</a>
+    </nav>
+
+    <div id="inicio" class="container">
+        <h1>Bienvenido al Reporte de Consistencia de Datos</h1>
+        <p>Este portal muestra el estado de la consistencia entre Teradata y el Data Warehouse para la Dirección de Riesgo de Infraestructura.</p>
+    </div>
+
+    <div id="ejecutivo" class="container">
+        <h2>Principales Indicadores Dirección Riesgo Infraestructura</h2>
+        <div id="kpis">
+            <p><strong>Consistencia General:</strong> <span id="consistenciaGeneral"></span>%</p>
+            <p><strong>Inconsistencias Totales:</strong> <span id="inconsistenciasTotales"></span></p>
+            <canvas id="graficoConsistencia" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+    <div id="detalle" class="container">
+        <h2>Detalle de Inconsistencias por Insumo</h2>
+        <div id="buroCredito">
+            <h3>Buró de Crédito</h3>
+            <table class="detalleInsumo">
+                <thead>
+                    <tr>
+                        <th>Campo</th>
+                        <th>Teradata</th>
+                        <th>Data Warehouse</th>
+                        <th>Diferencia</th>
+                        <th>Impacto</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div id="crp">
+            <h3>CRP</h3>
+            <table class="detalleInsumo">
+                <thead>
+                    <tr>
+                        <th>Campo</th>
+                        <th>Teradata</th>
+                        <th>Data Warehouse</th>
+                        <th>Diferencia</th>
+                        <th>Impacto</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div id="s111">
+            <h3>S111</h3>
+            <table class="detalleInsumo">
+                <thead>
+                    <tr>
+                        <th>Campo</th>
+                        <th>Teradata</th>
+                        <th>Data Warehouse</th>
+                        <th>Diferencia</th>
+                        <th>Impacto</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div id="als">
+            <h3>ALS</h3>
+            <table class="detalleInsumo">
+                <thead>
+                    <tr>
+                        <th>Campo</th>
+                        <th>Teradata</th>
+                        <th>Data Warehouse</th>
+                        <th>Diferencia</th>
+                        <th>Impacto</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Datos de ejemplo (reemplaza con tus datos reales)
+        const datosEjecutivos = {
+            consistenciaGeneral: 85,
+            inconsistenciasTotales: 1250,
+            inconsistenciasPorArea: {
+                Buro: 300,
+                CRP: 500,
+                S111: 200,
+                ALS: 250,
+            }
+        };
+
+        const datosDetalle = {
+            buroCredito: [
+                { campo: "ID de Cliente", teradata: "123", dataWarehouse: "1234", diferencia: "Diferente ID", impacto: "Riesgo en datos de clientes", color: "red" },
+                { campo: "Importe de Deuda", teradata: "100.00", dataWarehouse: "100.00", diferencia: "Coincide", impacto: "Sin impacto", color: "green" },
+            ],
+            crp: [
+                { campo: "Número de Contrato", teradata: "ABC1234", dataWarehouse: "ABC12345", diferencia: "Diferente contrato", impacto: "Riesgo en contratos", color: "red" },
+                { campo: "Fecha de Vencimiento", teradata: "2023-11-30", dataWarehouse: "2023-11-30", diferencia: "Coincide", impacto: "Sin impacto", color: "green" },
+            ],
+            s111: [
+                { campo: "Monto de Prestamo", teradata: "5000", dataWarehouse: "5000", diferencia: "Coincide", impacto: "Sin impacto", color: "green" },
+                { campo: "Tipo de Prestamo", teradata: "Personal", dataWarehouse: "Comercial", diferencia: "Diferente tipo", impacto: "Error en tipo de prestamo", color: "yellow" },
+            ],
+            als: [
+                { campo: "Numero de Cuenta", teradata: "98765", dataWarehouse: "98765", diferencia: "Coincide", impacto: "Sin impacto", color: "green" },
+                { campo: "Saldo", teradata: "1000", dataWarehouse: "1100", diferencia: "Diferencia en saldo", impacto: "Error en saldo", color: "yellow" },
+            ],
+        };
+
+        // Mostrar datos ejecutivos
+        document.getElementById("consistenciaGeneral").textContent = datosEjecutivos.consistenciaGeneral;
+        document.getElementById("inconsistenciasTotales").textContent = datosEjecutivos.inconsistenciasTotales;
+
+        // Gráfico de consistencia por área
+        const ctx = document.getElementById("graficoConsistencia").getContext("2d");
+        new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: Object.keys(datosEjecutivos.inconsistenciasPorArea),
+                datasets: [{
+                    label: "Inconsistencias por Insumo",
+                    data: Object.values(datosEjecutivos.inconsistenciasPorArea),
+                    backgroundColor: "rgba(54, 162, 235, 0.5)",
+                    borderColor: "rgba(54, 162, 235, 1)",
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Llenar tablas de detalle por insumo
+        function llenarTablaDetalle(insumo, datos) {
+            const tabla = document.querySelector(`#${insumo} table tbody`);
+            datos.forEach(dato => {
+                const fila = tabla.insertRow();
+                const celdaCampo = fila.insertCell();
+                const celdaTeradata = fila.insertCell();
+                const celdaDataWarehouse = fila.insertCell();
+                const celdaDiferencia = fila.insertCell();
+                const celdaImpacto = fila.insertCell();
+
+                celdaCampo.textContent = dato.campo;
+                celdaTeradata.textContent = dato.teradata;
+                celdaDataWarehouse.textContent = dato.dataWarehouse;
+                celdaDiferencia.textContent = dato.diferencia;
+                celdaImpacto.textContent = dato.impacto;
+
+                fila.classList.add(dato.color);
+            });
+        }
+
+        llenarTablaDetalle("buroCredito", datosDetalle.buroCredito);
+        llenarTablaDetalle("crp", datosDetalle.crp);
+        llenarTablaDetalle("s111", datosDetalle.s111);
+        llenarTablaDetalle("als", datosDetalle.als);
+    </script>
+</body>
+</html>
